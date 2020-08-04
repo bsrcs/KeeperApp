@@ -1,34 +1,68 @@
 import React, { useState } from "react";
+import AddIcon from '@material-ui/icons/Add';
+import Fab from '@material-ui/core/Fab';
+import { Zoom } from '@material-ui/core';
 
 function CreateArea(props) {
-  const [inputTitle, setTitle] = useState("");
-  const [inputText, setText] = useState("");
+  
+  const [isExpanded, setExpand] = useState(false);
+  const [note, setNote] = useState({
+    title: "",
+    content: ""
+  });
 
   function handleChange(event) {
-    const name = event.target.name;
-    const newValue = event.target.value;
+    const { name, value } = event.target;
 
-    if (name === "title") {
-      setTitle(newValue);
-    }
-    else if (name === "content") {
-      setText(newValue);
-    }
+    setNote(prevNote => {
+      return {
+        ...prevNote,
+        [name]: value
+      };
+    });
+  }
+
+  function submitNote(event) {
+    props.onAdd(note);
+    setNote({
+      title: "",
+      content: ""
+    });
+    event.preventDefault();
   }
   
+  // expand the intial text area 
+  function expand(){
+    setExpand(true);
+  }
+
+  // check if textarea is clicked, if clicked then show the title
+  // so that you can expand the text area
+  // if textarea is clicked grow the rows number
+  // use zoom to hide Add button
   return (
     <div>
-      <form onSubmit={(event) => {
-        props.onAdd(inputTitle, inputText);
-        // prevent refreshing the page after submitting 
-        event.preventDefault();
-        // set Title & Text to blank
-        setTitle("");
-        setText("");
-      }} >
-        <input onChange={handleChange} name="title" placeholder="Title" value={inputTitle} />
-        <textarea onChange={handleChange} name="content" placeholder="Take a note..." value={inputText} rows="3" />
-        <button>Add</button>
+      <form className="create-note">
+       {isExpanded && 
+       <input
+          name="title"
+          onChange={handleChange}
+          value={note.title}
+          placeholder="Title"
+        />}
+        <textarea
+          onClick={expand}
+          name="content"
+          onChange={handleChange}
+          value={note.content}
+          placeholder="Take a note..."
+          rows= {isExpanded ? 3 : 1}
+        />
+        <Zoom in={isExpanded}>
+          <Fab onClick={submitNote}>
+            <AddIcon />
+          </Fab>
+        </Zoom>
       </form>
     </div>
   );
